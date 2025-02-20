@@ -9,10 +9,24 @@
 </head>
 
 <body>
-
-    <form hx-post="/contacts" hx-target="#contacts" hx-swap="outerHTML">
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.body.addEventListener('htmx:beforeSwap', (event) => {
+                if (event.detail.xhr.status === 422) {
+                    event.detail.shouldSwap = true;
+                    event.detail.isError = false;
+                }
+            });
+        });
+    </script>
+    <form hx-post="/contacts" hx-swap="outerHTML">
         Name: <input name="name" type="text" />
         Email: <input name="email" type="email" />
+        <?php
+        if (isset($errors['email'])) {
+            echo "<span style='color:red;'>{$errors['email']}</span>";
+        }
+        ?>
         <button type="submit">Create Contact</button>
     </form>
     <div id="contacts" style="display: flex; flex-direction: column;">

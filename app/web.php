@@ -2,6 +2,7 @@
 
 use App\Route;
 use App\View;
+use App\Helpers;
 
 $router = new Route($_SERVER);
 
@@ -30,9 +31,20 @@ $router->post('/count', function () {
 //newbie checking super globals post
 $router->post('/contacts', function () {
 
+    $errors = [];
     $name = $_POST['name'];
     $email = $_POST['email'];
     $contacts = $_SESSION['contacts'];
+
+    //validation (How can I add http status code to this?) http headers?
+
+    if (Helpers::emailExists($contacts, $email)) {
+        $errors['email'] = 'Email already exists';
+        http_response_code(422);
+        echo View::make('create-form', ['contacts' => $contacts, 'errors' => $errors, 'formData' => ['name' => $name, 'email' => $email]]);
+        return;
+    }
+
     $contacts[] = ['name' => $name, 'email' => $email];
     $_SESSION['contacts'] = $contacts;
 
